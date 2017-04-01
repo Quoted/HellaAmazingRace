@@ -160,6 +160,7 @@ export default class PubMap extends React.Component {
       window.races.push(race);
     }
 
+    console.log('payload', payload.message.markers)
     if (payload.message.markers && !window.checkpointsLoaded) {
       let markersArr = this.generateMarkersArray(payload.message.markers);
 
@@ -320,18 +321,13 @@ export default class PubMap extends React.Component {
 
     pubnub.subscribe({channels: [pnChannel]});
   }
-
   render() {
     return (
-      <div id="map">
+      <div  className="raceMapContainer" >
+        <div id="map"></div>
       </div>
     );
   }
+
 }
 
-
-// Things we can do
-
-// multiple users in multiple races
-// more than 2 users 
-// saving races in db and displaying races Han?

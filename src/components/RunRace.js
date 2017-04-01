@@ -5,13 +5,16 @@ import PubMap from './PubMap';
 import Autocomplete from './Autocomplete';
 import Timer from './Timer';
 import Capture from './Capture';
-
+import RaisedButton from 'material-ui/RaisedButton';
+import UsersButton from './UsersButton.jsx'
+import BottomNavigationButtons from './BottomNavigation.jsx';
 
 
 export default class RunRace extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       searchedRace: 'test',
       markers: null,
@@ -19,15 +22,23 @@ export default class RunRace extends React.Component {
       raceComplete: false,
       raceRunning: false,
       raceName: null
-    };
+    }
 
-    // get users name for saving race results when page is loading.
+
+    // this.setState({markers: this.props.markers});
+
+        // get users name for saving race results when page is loading.
     $.get('/username')
       .done((res) => {
         window.currentUserPic = res.photos[0].value;
         window.currentUser = res.displayName;
       });
   }
+
+  componentWillMount() {
+    this.setState({markers: this.props.markers})
+  }
+  
 
   searchedRaceNameChange(e) {
     this.setState({
@@ -50,6 +61,15 @@ export default class RunRace extends React.Component {
       }
     });
   }
+
+  distanceAway() {
+    let currLocation = new google.maps.LatLng( window.currentLocation[0], window.currentLocation[1] );
+    let checkpointLocation = new google.maps.LatLng(window.markers[0].getPosition().lat(), window.markers[0].getPosition().lng() );
+    let distance = google.maps.geometry.spherical.computeDistanceBetween(currLocation, checkpointLocation);
+
+    return distance;
+  }
+
 
   verifyLocation() {
     // if not running, start running race when checking start checkpoint location
@@ -79,48 +99,22 @@ export default class RunRace extends React.Component {
       alert(`You are still ${Math.floor(distance)} meters away.`);
     }
   }
-  searchType(e){
-    this.setState({
-      raceName: e.target.value
-    })
-  }
 
+  handleClick(e) {
+    console.log('props', this.props);
+  }
+  
   render() {
 
-    const verifyBtnStyle = {
-      'width': '800px',
-      'margin-left': 'auto',
-      'margin-right': 'auto'
-    };
-
-    return (
-      <div className="text-center">
-        <h1 className="text-center"> Run a Race</h1>
-        <h3 className="text-center"> {this.state.title ? `Get Ready to start ${this.state.title}!` : ''}</h3>
-
-
-
-        <form>
-          <input type="text" value={this.state.searchedRace} onChange={this.searchedRaceNameChange.bind(this)}/>
-          <button type="button" className="btn btn-primary" onClick={this.loadRace.bind(this)}>Load Race</button>
-        </form>
-
-        <form>
-          <input type="text" value={this.state.raceName} onChange={this.searchType.bind(this)}/>
-          <button type="button" className="btn btn-primary" onClick={ () => { console.log('hi') }}>Load Racers</button>
-        </form>
-
-
-        <Timer raceTitle={this.state.title} running={this.state.raceRunning} complete={this.state.raceComplete}/>
-
-        <Capture state={this.state} />
-
-        <div style={verifyBtnStyle}>
-          <button type="button" className="btn btn-success btn-block" onClick={this.verifyLocation.bind(this)}>I Have Arrived at Current Checkpoint</button>
+    return (      
+      <div className="raceMapContainer">
+        <PubMap markers={this.props.markers} raceName={this.props.raceName} />
+        <RaisedButton id="test" onClick={this.handleClick.bind(this)} />
+        <div id="runRaceNavBar" onClick={this.handleClick.bind(this)} > 
+            <UsersButton id="users" />
+            <Timer id="timer" raceTitle={'Amazing Racing'} running={true} />            
         </div>
-
-
-        <PubMap markers={this.state.markers} raceName={this.state.raceName}/>
+        <BottomNavigationButtons history={this.props.history} distanceAway={this.distanceAway} id="runRaceFooterBar" />
       </div>
     );
   }

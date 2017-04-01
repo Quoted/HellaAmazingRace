@@ -19,6 +19,13 @@ import util from './config/utility';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+/* Need this for material UI */
+import injectTapEventPlugin from 'react-tap-event-plugin';
+
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+injectTapEventPlugin();
+
 // import gcloud from 'google-cloud';
 import gCred from './config/gcloud/cred';
 import fileUpload from 'express-fileupload';
@@ -32,7 +39,8 @@ if (process.env.NODE_ENV === 'production') {
   passport.use(new Strategy({
     clientID: '630724287121611',
     clientSecret: '39b0e9bbb91cdb757f264099dff78b0b',
-    callbackURL: 'https://hella-amazing-race.herokuapp.com/auth/facebook/callback',
+    callbackURL: 'https://secure-reef-34714.herokuapp.com/auth/facebook/callback',
+
     profileFields: ['id', 'displayName', 'name', 'gender', 'picture.type(large)']
   },
     function(accessToken, refreshToken, profile, cb) {
@@ -43,8 +51,8 @@ if (process.env.NODE_ENV === 'production') {
 } else {  // local development facebook auth info (test app)
   console.log('>>in development environment');
   passport.use(new Strategy({
-    clientID: '1688391161459186',
-    clientSecret: '5246f436cebd0d4b62ef8ec2791c5ed0',
+    clientID: '1016193961847191',
+    clientSecret: '3b7240f21274cefcdc425d318a55e43d',
     callbackURL: 'http://localhost:3000/auth/facebook/callback',
     profileFields: ['id', 'displayName', 'name', 'gender', 'picture.type(small)']
   },
@@ -90,8 +98,7 @@ app.use(passport.session());
 
 
 // passport routes
-app.get('/auth/facebook',
-  passport.authenticate('facebook'));
+app.get('/auth/facebook', passport.authenticate('facebook'));
 
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/' }),
@@ -114,10 +121,6 @@ app.get('/username', util.isLoggedIn, (req, res) => {
   res.send(req.user);
 });
 
-// wildcard route for react routing
-app.get('*', util.isLoggedIn, (req, res) => {
-  res.sendFile(path.join(__dirname, 'static/index-static.html'));
-});
 
 ///// POST Requests /////
 
@@ -131,7 +134,20 @@ app.post('/saveRaceResults', RaceHelpers.saveRaceResults);
 
 app.post('/loadRaceResults', RaceHelpers.loadRaceResults);
 
-app.post('/analyzePhoto', RaceHelpers.analyzePhoto);
+app.post('/analyzePhoto/category/:categoryType', RaceHelpers.analyzePhoto);
+
+// app.get('/getObjective/:categoryType/:currentLng/:currentLat', RaceHelpers.getObjective); //GEOLOCATIONN
+
+app.get('/getObjective/:categoryType', RaceHelpers.getObjective);
+
+
+app.get('/Races', RaceHelpers.getRaces);
+
+
+// wildcard route for react routing
+app.get('*', util.isLoggedIn, (req, res) => {
+  res.sendFile(path.join(__dirname, 'static/index-static.html'));
+});
 
 const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV || 'production';
