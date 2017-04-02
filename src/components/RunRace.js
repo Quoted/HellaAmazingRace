@@ -14,22 +14,32 @@ export default class RunRace extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       searchedRace: 'test',
       markers: null,
       title: null,
       raceComplete: false,
       raceRunning: false,
-      opponent: ''
-    };
+      raceName: null,
+      showPopUp: false
+    }
 
-    // get users name for saving race results when page is loading.
+
+    // this.setState({markers: this.props.markers});
+
+        // get users name for saving race results when page is loading.
     $.get('/username')
       .done((res) => {
         window.currentUserPic = res.photos[0].value;
         window.currentUser = res.displayName;
       });
   }
+
+  componentWillMount() {
+    this.setState({markers: this.props.markers})
+  }
+  
 
   searchedRaceNameChange(e) {
     this.setState({
@@ -52,6 +62,15 @@ export default class RunRace extends React.Component {
       }
     });
   }
+
+  distanceAway() {
+    let currLocation = new google.maps.LatLng( window.currentLocation[0], window.currentLocation[1] );
+    let checkpointLocation = new google.maps.LatLng(window.markers[0].getPosition().lat(), window.markers[0].getPosition().lng() );
+    let distance = google.maps.geometry.spherical.computeDistanceBetween(currLocation, checkpointLocation);
+
+    return distance;
+  }
+
 
   verifyLocation() {
     // if not running, start running race when checking start checkpoint location
@@ -81,21 +100,22 @@ export default class RunRace extends React.Component {
       alert(`You are still ${Math.floor(distance)} meters away.`);
     }
   }
+
   handleClick(e) {
     console.log('props', this.props);
   }
-
+  
   render() {
 
     return (      
       <div className="raceMapContainer">
-        <PubMap markers={this.state.markers}/>
+        <PubMap markers={this.props.markers} raceName={this.props.raceName} />
         <RaisedButton id="test" onClick={this.handleClick.bind(this)} />
         <div id="runRaceNavBar" onClick={this.handleClick.bind(this)} > 
             <UsersButton id="users" />
-            <Timer id="timer" raceTitle={'Amazing Racing'} running={true} />
+            <Timer id="timer" raceTitle={'Amazing Racing'} running={true} />            
         </div>
-        <BottomNavigationButtons history={this.props.history} id="runRaceFooterBar" />
+        <BottomNavigationButtons history={this.props.history} distanceAway={this.distanceAway} id="runRaceFooterBar" />
       </div>
     );
   }
