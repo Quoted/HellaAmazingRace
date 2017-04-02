@@ -133,7 +133,6 @@ body {
 
 
 .raceMapContainer {
-  background-color: orange;
   height: 100%;
   width: 100%;
   z-index: 98;
@@ -191,8 +190,6 @@ body {
   height: 50px;
   width: 100%;
 }
-
-
 
 
 
@@ -267,26 +264,82 @@ Non flex box implementation
 Flex box implementation
 */
 .camera-iconBox {
-  
   height: 20%;
-  width: 20%;
+  width: 100%;
   margin-bottom: 10%;
-  margin-left: -4%;
+  display: -webkit-flex;  
+  flex-wrap: wrap;
+  flex-flow: row;
+  justify-content: center;
+
+  /*
+  flex-flow: row;
+  justify-content: center;  
+  */
 }
 
 .camera-iconBox img {
-  height: 200px;
-  width: 200px;
+  height: 100px;
+  width: 100px;
+  margin: 10px;
+}
+
+#canvas {  
+  justify-content: center;    
 }
 
 #checkPointTask {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.spinLogos {
+  animation-name: spinLogos;  
+  animation-duration: 2s;  
+  animation-iteration-count: 1;
+  -webkit-animation-fill-mode: forwards;
+
+}
+@keyframes spinLogos { 
+  0% {transform:rotate(0deg); }
+  100% {transform:rotate(42000deg); } 
+}
+
+.spinLandmarks{
+  animation-name: spinLandmarks;  
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  -webkit-animation-fill-mode: forwards;
+}
+@keyframes spinLandmarks { 
+  0% {transform:rotate(0deg); }
+  100% {transform:rotate(45000deg); } 
+}
+
+.spinLabels{
+  animation-name: spinLabels;  
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  -webkit-animation-fill-mode: forwards;
+}
+@keyframes spinLabels { 
+  0% {transform:rotate(0deg); }
+  100% {transform:rotate(48000deg); } 
 }
 
 
-#space {
-  background-color: yellow;
-  flex: 1;
+
+
+
+
+.makeSmaller {
+  width: 250px;
+  height: 250px;
 }
+
+
+
 
 #fileUploader {
   /*display: none;*/
@@ -332,5 +385,12 @@ writing media queries specific to the iphone
   }
 
 }
+
+
+.highZ {
+  z-index: 1000;
+}
+
+
 
 

@@ -4,6 +4,7 @@ import gcloud from 'google-cloud';
 import gCred from '../../config/gcloud/cred';
 import path from 'path';
 import fileUpload from 'express-fileupload';
+import gPlaceType from '../../config/gcloud/googlePlaceType';
 
 var vision = gcloud.vision;
 
@@ -32,6 +33,7 @@ exports.storeSavedRace = (req, res) => {
 };
 
 exports.loadRaceData = (req, res) => {
+  console.log('req body', req.body);
   Race.findOne(req.body).exec((err, raceData) => {
     if (!raceData) {
       res.send('Race doesn\'t exist');
@@ -67,24 +69,68 @@ exports.loadRaceResults = (req, res) => {
   });
 }
 
+exports.getRaces = (req, res) => {
+  Race.find({})
+  .then((data) =>  {    
+    res.json(data);
+  })
+  .catch((err) => {
+    res.status(500).send(err);
+  })
+}
+
+
+exports.getObjective = (req, res) => {
+  let category = req.params.categoryType; 
+  //GEOLOCATION BY GOOGLE PLACES
+  // let currentLng = req.params.currentLng;
+  // let currentLat = req.params.currentLat;
+  // if(categoryType !== 'label') {    
+  //   let radius = 500 //meters
+  //   let key = gCred.key;
+  //   let type = gPlaceType.googlePlaceType[Math.floor(Math.random() * gPlaceType.googlePlaceType.length)];
+
+  //   var https = require('https');
+  //   var url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" + "location=" + currentLat + "," + currentLng + "&radius=" + radius + "&type=" + type + "&keyword=" + categoryType + "&key=" + key;
+  //   console.log('url: ', url);
+  //   https.get(url, function(response) {
+  //     var body ='';
+  //     response.on('data', function(chunk) {
+  //       body += chunk;
+  //     });
+  //     response.on('end', function() {
+  //       console.log('end body: ', body);
+  //         var places = JSON.parse(body);
+  //         var locations = places.results;
+  //         var randLoc = locations[Math.floor(Math.random() * locations.length)] || 'Try Again';
+  //         res.json(randLoc);
+  //     });
+  //   }).on('error', function(e) {
+  //     console.log("Got error: " + e.message);
+  //   });
+  // } else {
+    var objectives = {
+      animals: ['cat', 'dog', 'bird', 'person', 'aligator'],
+      travel: ['car', 'bus', 'train', 'boat', 'plane'],
+      stationaries: ['table', 'musical instrument', 'pencil', 'chair', 'toy', 'computer']
+      };
+    var randomObject = objectives[category][Math.floor(Math.random() * objectives[category].length)];
+    res.json(randomObject);
+
+    // var objectives = ['chair', 'machine', 'musical instrument', 'toy', 'car', 'bus', 'person', 'glasses', 'hair'];
+    // var randomObject = objectives[Math.floor(Math.random() * objectives.length)];
+    // res.json(randomObject);
+  // }
+}
+
 exports.analyzePhoto = (req, res) => {
-  console.log('req files: ', req.file);
-  console.log('got something from client'); 
+  let categoryType = req.params.categoryType;
 
   if (!req.files) {
     return res.status(400).send('No files were uploaded.');
   }
-  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file 
-  let sampleFile = req.files.file.data;
-  console.log(sampleFile);
-
-  var types = [
-    'label'
-  ]
-
-  //expecting: req.body.image
-  var image = sampleFile;
-  // var image = 'http://az616578.vo.msecnd.net/files/2016/07/09/6360363022594514001256241258_SBSB.png';
+  let image = req.files.file.data;
+  console.log('image in file: ', image);
 
   //FOR DEVELOPMENT
   var visionClient = vision({
@@ -92,16 +138,29 @@ exports.analyzePhoto = (req, res) => {
     keyFilename: 'src/config/gcloud/quoted-hella-keyFile.json'
   });
 
-  visionClient.detectLabels(image, function(err, result, apiResponse) {
-    if (err) {
-      console.log('Cloud Vision Error: ', err)
-      res.status(500).send(err);
-    } else {
-      console.log(result);
-      res.json(result);
-    }
-  });
-}
+  // var analysisFunctions = {
+  //   'label': visionClient.detectLabels(image),
+  //   'logos': visionClient.detectLogos(image),
+  //   'landmarks': visionClient.detectLandmarks(image)
+  // };
+
+  // analysisFunctions[categoryType]
+  //   .then((results) => {
+  //     res.json(results);
+  //   })
+  //   .catch((error) => {
+  //     res.status(500).send(err);
+  //   })
+
+    visionClient.detectLabels(image, function(err, result) {
+      if (err) {
+        console.log('Error ', err);
+        res.status(500).send(err);
+      } else {
+        res.send(result);
+      }
+    });
+};
 
 
 

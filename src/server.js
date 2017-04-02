@@ -37,11 +37,11 @@ var Strategy = require('passport-facebook').Strategy;
 if (process.env.NODE_ENV === 'production') {
   console.log('>>in production environment');
   passport.use(new Strategy({
-    clientID: '630724287121611',
-    clientSecret: '39b0e9bbb91cdb757f264099dff78b0b',
-    callbackURL: 'https://secure-reef-34714.herokuapp.com/auth/facebook/callback',
+    clientID: '1016193961847191',
+    clientSecret: '3b7240f21274cefcdc425d318a55e43d',
+    callbackURL: 'https://wicked-amazing-race.herokuapp.com/auth/facebook/callback',
 
-    profileFields: ['id', 'displayName', 'name', 'gender', 'picture.type(large)']
+    profileFields: ['id', 'displayName', 'name', 'gender', 'picture.type(small)']
   },
     function(accessToken, refreshToken, profile, cb) {
       return cb(null, profile);
@@ -51,8 +51,8 @@ if (process.env.NODE_ENV === 'production') {
 } else {  // local development facebook auth info (test app)
   console.log('>>in development environment');
   passport.use(new Strategy({
-    clientID: '1947534422132704',
-    clientSecret: 'c7340399067cf036c05f76c461903d61',
+    clientID: '1016193961847191',
+    clientSecret: '3b7240f21274cefcdc425d318a55e43d',
     callbackURL: 'http://localhost:3000/auth/facebook/callback',
     profileFields: ['id', 'displayName', 'name', 'gender', 'picture.type(small)']
   },
@@ -121,10 +121,6 @@ app.get('/username', util.isLoggedIn, (req, res) => {
   res.send(req.user);
 });
 
-// wildcard route for react routing
-app.get('*', util.isLoggedIn, (req, res) => {
-  res.sendFile(path.join(__dirname, 'static/index-static.html'));
-});
 
 ///// POST Requests /////
 
@@ -138,7 +134,20 @@ app.post('/saveRaceResults', RaceHelpers.saveRaceResults);
 
 app.post('/loadRaceResults', RaceHelpers.loadRaceResults);
 
-app.post('/analyzePhoto', RaceHelpers.analyzePhoto);
+app.post('/analyzePhoto/category/:categoryType', RaceHelpers.analyzePhoto);
+
+// app.get('/getObjective/:categoryType/:currentLng/:currentLat', RaceHelpers.getObjective); //GEOLOCATIONN
+
+app.get('/getObjective/:categoryType', RaceHelpers.getObjective);
+
+
+app.get('/Races', RaceHelpers.getRaces);
+
+
+// wildcard route for react routing
+app.get('*', util.isLoggedIn, (req, res) => {
+  res.sendFile(path.join(__dirname, 'static/index-static.html'));
+});
 
 const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV || 'production';
